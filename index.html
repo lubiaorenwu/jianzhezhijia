@@ -280,14 +280,14 @@ td .sub{color:var(--faint); font-size:11.3px}
   #burger{display:grid}
   main{margin-left:0; padding:calc(var(--top) + 14px) 14px 48px}
   .top .search{display:none}
-  #login{grid-template-columns:1fr; grid-template-rows:auto 1fr; overflow-y:auto}
-  #login .art{display:flex; flex-direction:row; align-items:center; gap:14px;
-    padding:24px 20px 2px; border-right:0}
-  #login .art .cap{order:0; flex:1; min-width:0}
-  #login .art .cap .brand{font-size:11px; letter-spacing:.10em}
-  #login .art .cap h1{font-size:18px; line-height:1.26; margin:7px 0 0}
-  #login .art .pic{width:122px; max-width:122px; flex:none; margin:0}
-  #login .form{padding:16px 20px 36px; align-items:flex-start}
+  #login{grid-template-columns:1fr; grid-template-rows:auto auto; overflow-y:auto; align-content:start}
+  #login .art{display:flex; flex-direction:column; align-items:center; text-align:center;
+    padding:26px 24px 4px; border-right:0}
+  #login .art .pic{width:196px; max-width:62%; margin:0 0 16px; order:-1}
+  #login .art .cap{order:0}
+  #login .art .cap .brand{justify-content:center; font-size:11px; letter-spacing:.10em}
+  #login .art .cap h1{font-size:19px; line-height:1.28; margin:8px 0 0; text-align:center}
+  #login .form{padding:20px 22px 40px; align-items:flex-start}
   #login .box{max-width:none}
   .kpi .v{font-size:21px}
   th,td{padding:8px 10px}
