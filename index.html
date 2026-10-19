@@ -50,11 +50,11 @@ svg{display:block}
   position:fixed; inset:0; display:grid; grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);
   z-index:60; background:var(--paper);
 }
-#login .art{position:relative; overflow:hidden; background:var(--ink)}
-#login .art img{position:absolute; inset:-24px; width:calc(100% + 48px); height:calc(100% + 48px);
-  object-fit:cover; filter:blur(10px) brightness(.72) saturate(.9); transform:scale(1.04)}
-#login .art::after{content:""; position:absolute; inset:0;
-  background:linear-gradient(200deg,rgba(20,23,28,.35) 0%,rgba(20,23,28,.72) 55%,rgba(20,23,28,.92) 100%)}
+#login .art{position:relative; overflow:hidden;
+  background:linear-gradient(160deg,#1B1F26 0%,#14171C 55%,#0E1013 100%)}
+#login .art::before{content:""; position:absolute; inset:0;
+  background:radial-gradient(900px 520px at 18% 20%,rgba(176,74,22,.18),transparent 62%),
+             radial-gradient(700px 420px at 84% 90%,rgba(203,182,165,.07),transparent 60%)}
 #login .art .cap{position:absolute; left:52px; right:52px; bottom:48px; color:#F4F2ED; z-index:2}
 #login .art .cap .brand{display:flex; align-items:center; gap:10px; font-size:13px; letter-spacing:.14em;
   text-transform:uppercase; color:#CBB6A5}
@@ -300,11 +300,10 @@ td .sub{color:var(--faint); font-size:11.3px}
 <!-- ============ 登录 ============ -->
 <div id="login">
   <div class="art">
-    <img src="登录底图.jpg" alt="" onerror="this.style.display='none'">
     <div class="cap">
       <div class="brand"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg> 建设者之家</div>
       <h1>把每一笔进出<br>记成一笔明白账</h1>
-      <p>进货、卖货、赊账、回款，一处记清楚。数据只存在这台电脑上，不上传任何地方。</p>
+      <p>进货、卖货、赊账、回款，一处记清楚。手机和电脑共用一份账，出门也能查。</p>
     </div>
   </div>
   <div class="form">
