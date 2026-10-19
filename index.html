@@ -501,6 +501,12 @@ td .sub{color:var(--faint); font-size:11.3px}
           <div class="bars" id="cat-list" style="margin-bottom:12px"></div>
           <div class="row"><input class="input" id="cat-new" placeholder="新类目名，如：零食"><button class="btn sm" id="cat-add">添加</button></div>
         </div></div>
+        <div class="card"><div class="hd"><h3>云同步</h3><div class="sub">手机和电脑共用一份账</div></div><div class="bd">
+          <div class="row"><input class="input" id="sync-url" placeholder="https://api.trygeoaudit.com"></div>
+          <div class="row" style="margin-top:8px"><input class="input" id="sync-key" placeholder="云端密钥（首次填写）"></div>
+          <div class="row" style="margin-top:10px"><button class="btn sm" id="sync-save">保存并测试</button><button class="btn ghost sm" id="sync-off">断开</button></div>
+          <div class="hint" id="sync-stat" style="margin-top:8px"></div>
+        </div></div>
       <div class="grid"><div class="card"><div class="hd"><h3>操作日志</h3><div class="sub">只追加，不可改</div><div class="sp"></div><span class="sub" id="audit-n"></span></div>
         <div class="bd tight"><div class="tw" style="max-height:320px"><table id="t-audit"><thead><tr><th>时间</th><th>账号</th><th>动作</th><th>详情</th></tr></thead><tbody></tbody></table></div></div></div></div>
     </section>
@@ -639,32 +645,46 @@ function save() {
   catch (e) { toast('保存失败：浏览器存储空间不足', true); }
   pushRemote();
 }
-/* ---------- 局域网共用（有 账务服务-v2.py 时自动启用；静态页自动退回本地存储） ---------- */
-const SYNC = { mode: 'local', timer: null, warned: false };
+/* ---------- 云同步 / 局域网（配了就共用；没配退回本机存储） ---------- */
+const SYNC = {
+  mode: 'local', timer: null, warned: false,
+  base() { return (localStorage.getItem('jzzj:api') || '').replace(/\/+$/, ''); },
+  key() { return localStorage.getItem('jzzj:key') || ''; },
+  on() { return !!(this.base() && this.key()); },
+  url(p) { return this.base() + p; }
+};
 function pushRemote() {
-  if (SYNC.mode !== 'remote') return;
+  if (!SYNC.on()) return;
   clearTimeout(SYNC.timer);
   SYNC.timer = setTimeout(() => {
-    fetch('api/data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(S) })
-      .catch(() => { if (!SYNC.warned) { SYNC.warned = true; toast('连不上账务服务，数据暂存在本机', true); } });
-  }, 350);
+    fetch(SYNC.url('/api/data'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Ledger-Key': SYNC.key() },
+      body: JSON.stringify(S)
+    }).then(r => { if (r.ok) SYNC.mode = 'remote'; })
+      .catch(() => { if (!SYNC.warned) { SYNC.warned = true; toast('连不上云端，数据已存在本机', true); } });
+  }, 400);
 }
 function pullRemote() {
-  fetch('api/data', { cache: 'no-store' })
-    .then(r => r.ok ? r.json() : null)
+  if (!SYNC.on()) { SYNC.mode = 'local'; return Promise.resolve(); }
+  return fetch(SYNC.url('/api/data'), { cache: 'no-store', headers: { 'X-Ledger-Key': SYNC.key() } })
+    .then(r => { if (r.status === 401) throw new Error('unauthorized'); return r.ok ? r.json() : null; })
     .then(o => {
-      if (!o) return;
+      if (!o) { SYNC.mode = 'local'; return; }
       SYNC.mode = 'remote';
-      if (o.v) {
-        const localHadData = (S.sales && S.sales.length) || (S.goods && S.goods.length);
+      const localHadData = (S.sales && S.sales.length) || (S.goods && S.goods.length);
+      if (hadRemoteData(o) || (o.users && o.users.length)) {
         Object.assign(S, o);
-        if (!hadRemoteData(o) && localHadData) { save(); }   // 服务端还是空的、本机有数据 → 先推上去
-        else { localStorage.setItem(KEY, JSON.stringify(S)); }
-        if (ME) { render(); }
-      } else { save(); }
+        if (!hadRemoteData(o) && localHadData) save();
+        else localStorage.setItem(KEY, JSON.stringify(S));
+        if (ME) render();
+      } else if (localHadData) { save(); }
       if (ROUTE === 'settings' && ME) renderSettings();
     })
-    .catch(() => { SYNC.mode = 'local'; });
+    .catch(e => {
+      SYNC.mode = 'local';
+      if (String(e).includes('unauthorized')) toast('云端密钥不对，已退回本机存储', true);
+    });
 }
 function hadRemoteData(o) {
   return (o.goods && o.goods.length) || (o.sales && o.sales.length) || (o.debts && o.debts.length);
@@ -1324,7 +1344,14 @@ function renderSettings() {
   $('#st-phone').value = S.shop.phone || ''; $('#st-foot').value = S.shop.foot || '';
   $('#st-pay').value = S.shop.pay || '';
   $('#data-stat').textContent = `商品 ${S.goods.length} · 销售单 ${S.sales.length} · 进货 ${S.buys.length} · 赊账 ${S.debts.length} · 回款 ${S.pays.length} · 日志 ${S.audit.length}`
-    + (SYNC.mode === 'remote' ? ' · 已连上账务服务（手机电脑共用）' : ' · 本机存储（未连服务）');
+    + (SYNC.mode === 'remote' ? ' · 已连上云端（手机电脑共用）' : ' · 本机存储');
+  if ($('#sync-url')) {
+    $('#sync-url').value = SYNC.base();
+    $('#sync-key').value = SYNC.key() ? '••••••••（已保存）' : '';
+    $('#sync-stat').textContent = SYNC.on()
+      ? (SYNC.mode === 'remote' ? '状态：已连接，改动会自动同步' : '状态：已配置，但还没连上')
+      : '状态：未配置。填上地址和密钥后，手机和电脑共用同一份账。';
+  }
   $('#t-users tbody').innerHTML = S.users.map(u => `<tr><td>${esc(u.u)}</td><td><span class="pill ${u.role === 'admin' ? 'ac' : ''}">${u.role === 'admin' ? '管理员' : '店员'}</span></td>
     <td class="r">${u.u === ME.u ? '<span class="sub">当前</span>' : `<button class="btn ghost sm" data-del-u="${esc(u.u)}">删除</button>`}</td></tr>`).join('');
   $('#audit-n').textContent = S.audit.length + ' 条';
@@ -1443,6 +1470,28 @@ function bind() {
       S.users.push({ u, role: 'staff', salt, hash: hashPass(p, salt) });
       audit('加用户', u); save(); closeModal(); renderSettings(); toast('已添加');
     };
+  };
+  $('#sync-save').onclick = () => {
+    const u = $('#sync-url').value.trim().replace(/\/+$/, '');
+    const k = $('#sync-key').value.trim();
+    if (!u) { toast('先填云端地址', true); return; }
+    if (!k || k.includes('••')) { if (!SYNC.key()) { toast('密钥还没填', true); return; } }
+    else { localStorage.setItem('jzzj:key', k); }
+    localStorage.setItem('jzzj:api', u);
+    toast('正在测试连接…');
+    fetch(u + '/api/ping', { cache: 'no-store' })
+      .then(r => r.json())
+      .then(o => {
+        if (o && o.ok) { toast('云端连上了，正在拉数据'); pullRemote(); }
+        else toast('云端没响应', true);
+      })
+      .catch(() => toast('连不上云端，检查地址或网络', true));
+    renderSettings();
+  };
+  $('#sync-off').onclick = () => {
+    if (!confirm('断开后本机继续用，但手机和电脑不再同步。确定？')) return;
+    localStorage.removeItem('jzzj:api'); localStorage.removeItem('jzzj:key');
+    SYNC.mode = 'local'; toast('已断开，数据留在本机'); renderSettings();
   };
   $('#cat-add').onclick = () => {
     const name = $('#cat-new').value.trim();
