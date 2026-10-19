@@ -50,16 +50,16 @@ svg{display:block}
   position:fixed; inset:0; display:grid; grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);
   z-index:60; background:var(--paper);
 }
-#login .art{position:relative; overflow:hidden;
-  background:linear-gradient(160deg,#1B1F26 0%,#14171C 55%,#0E1013 100%)}
+#login .art{position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:center;
+  padding:44px 52px; background:linear-gradient(165deg,#FBF8F3 0%,#F1EADF 100%)}
 #login .art::before{content:""; position:absolute; inset:0;
-  background:radial-gradient(900px 520px at 18% 20%,rgba(176,74,22,.18),transparent 62%),
-             radial-gradient(700px 420px at 84% 90%,rgba(203,182,165,.07),transparent 60%)}
-#login .art .cap{position:absolute; left:52px; right:52px; bottom:48px; color:#F4F2ED; z-index:2}
+  background:radial-gradient(760px 460px at 16% 10%,rgba(176,74,22,.10),transparent 62%)}
+#login .art .pic{position:relative; z-index:1; width:100%; max-width:540px; margin:14px auto 0; display:block}
+#login .art .cap{position:relative; z-index:2; color:#1B1F26; order:-1}
 #login .art .cap .brand{display:flex; align-items:center; gap:10px; font-size:13px; letter-spacing:.14em;
-  text-transform:uppercase; color:#CBB6A5}
-#login .art .cap h1{margin:14px 0 10px; font-size:34px; line-height:1.2; font-weight:650; letter-spacing:-.01em}
-#login .art .cap p{margin:0; color:#A9A49B; font-size:13.5px; max-width:42ch}
+  text-transform:uppercase; color:#B04A16}
+#login .art .cap h1{margin:14px 0 0; font-size:27px; line-height:1.24; font-weight:650; letter-spacing:-.01em; color:#1B1F26}
+#login .art .cap p{margin:0; color:#6B6660; font-size:13.5px; max-width:42ch}
 #login .form{display:flex; align-items:center; justify-content:center; padding:40px}
 #login .box{width:100%; max-width:348px}
 #login .box h2{margin:0 0 6px; font-size:22px; font-weight:650; letter-spacing:-.01em}
@@ -304,6 +304,7 @@ td .sub{color:var(--faint); font-size:11.3px}
       <div class="brand"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg> 建设者之家</div>
       <h1>把每一笔进出<br>记成一笔明白账</h1>
     </div>
+    <img class="pic" src="店招插画.png" alt="">
   </div>
   <div class="form">
     <div class="box">
