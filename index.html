@@ -51,9 +51,8 @@ svg{display:block}
   z-index:60; background:var(--paper);
 }
 #login .art{position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:center;
-  padding:44px 52px; background:linear-gradient(165deg,#FBF8F3 0%,#F1EADF 100%)}
-#login .art::before{content:""; position:absolute; inset:0;
-  background:radial-gradient(760px 460px at 16% 10%,rgba(176,74,22,.10),transparent 62%)}
+  padding:44px 52px; background:#fff; border-right:1px solid var(--line)}
+#login .art::before{display:none}
 #login .art .pic{position:relative; z-index:1; width:100%; max-width:540px; margin:14px auto 0; display:block}
 #login .art .cap{position:relative; z-index:2; color:#1B1F26; order:-1}
 #login .art .cap .brand{display:flex; align-items:center; gap:10px; font-size:13px; letter-spacing:.14em;
